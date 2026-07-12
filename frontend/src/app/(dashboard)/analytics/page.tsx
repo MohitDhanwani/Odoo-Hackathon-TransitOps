@@ -52,12 +52,12 @@ export default function AnalyticsPage() {
     fetchData();
   }, []);
 
-  const vehicleStats: Record<string, { 
-    name: string; 
-    revenue: number; 
-    cost: number; 
-    fuelCost: number; 
-    maintenanceCost: number; 
+  const vehicleStats: Record<string, {
+    name: string;
+    revenue: number;
+    cost: number;
+    fuelCost: number;
+    maintenanceCost: number;
     generalCost: number;
     fuelLiters: number;
     tripsCount: number;
@@ -127,7 +127,7 @@ export default function AnalyticsPage() {
     const allData = Object.values(vehicleStats);
     if (allData.length === 0) return toast.info("No data to export");
     const header = "Vehicle,Trips Completed,Total Revenue,Total Cost,Profit,Fuel Cost,Maintenance Cost,General Cost,Fuel Consumed (Liters)\n";
-    const rows = allData.map(v => 
+    const rows = allData.map(v =>
       `${v.name},${v.tripsCount},${v.revenue.toFixed(2)},${v.cost.toFixed(2)},${(v.revenue - v.cost).toFixed(2)},${v.fuelCost.toFixed(2)},${v.maintenanceCost.toFixed(2)},${v.generalCost.toFixed(2)},${v.fuelLiters.toFixed(2)}`
     ).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
@@ -168,7 +168,7 @@ export default function AnalyticsPage() {
           <h1 className="text-2xl font-bold tracking-tight">Analytics & ROI</h1>
           <p className="text-[var(--text-secondary)] text-sm mt-1">Detailed performance metrics and cost analysis.</p>
         </div>
-        
+
         <Button onClick={exportCSV} className="shrink-0 gap-2">
           <Download className="w-4 h-4" /> Export CSV
         </Button>
@@ -188,7 +188,7 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-strong)', borderRadius: '8px' }}
                     itemStyle={{ color: '#fff' }}
                   />
@@ -220,13 +220,15 @@ export default function AnalyticsPage() {
                     paddingAngle={2}
                     dataKey="value"
                     labelLine={false}
-                    label={({ name, value, percent }) => `${name}: $${value} (${(percent * 100).toFixed(0)}%)`}
+                    label={({ name, value, percent }) =>
+                      `${name}: $${value} (${((percent ?? 0) * 100).toFixed(0)}%)`
+                    }
                   >
                     {pieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} stroke="var(--bg-card)" strokeWidth={2} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-strong)', borderRadius: '8px' }}
                     itemStyle={{ color: '#fff' }}
                     formatter={(value) => `$${value}`}
@@ -237,7 +239,7 @@ export default function AnalyticsPage() {
             )}
           </div>
         </div>
-        
+
         <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-xl p-6 flex flex-col gap-4">
           <h2 className="text-lg font-semibold">Fuel Consumption Over Time</h2>
           <div className="h-[300px] w-full">
@@ -251,7 +253,7 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="date" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-strong)', borderRadius: '8px' }}
                     itemStyle={{ color: '#fff' }}
                   />
@@ -275,7 +277,7 @@ export default function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
                   <XAxis type="number" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis dataKey="name" type="category" stroke="var(--text-muted)" fontSize={12} tickLine={false} axisLine={false} width={80} />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: 'var(--bg-card)', borderColor: 'var(--border-strong)', borderRadius: '8px' }}
                     itemStyle={{ color: '#fff' }}
                   />
