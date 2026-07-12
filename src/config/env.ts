@@ -12,6 +12,7 @@ const envSchema = z.object({
   COOKIE_NAME: z.string().default("transitops_token"),
   LOGIN_MAX_ATTEMPTS: z.coerce.number().default(5),
   LOGIN_LOCK_MINUTES: z.coerce.number().default(20),
+  FRONTEND_URL: z.string().url("FRONTEND_URL must be a valid URL").default("http://localhost:8000"),
 });
 
 const parsed = envSchema.safeParse(process.env);
