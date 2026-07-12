@@ -90,3 +90,45 @@ export const expenses = pgTable("expenses", {
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+import { relations } from 'drizzle-orm';
+
+export const tripsRelations = relations(trips, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [trips.vehicleId],
+    references: [vehicles.id],
+  }),
+  driver: one(drivers, {
+    fields: [trips.driverId],
+    references: [drivers.id],
+  }),
+  createdBy: one(users, {
+    fields: [trips.createdById],
+    references: [users.id],
+  }),
+}));
+
+export const maintenanceLogsRelations = relations(maintenanceLogs, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [maintenanceLogs.vehicleId],
+    references: [vehicles.id],
+  }),
+}));
+
+export const fuelLogsRelations = relations(fuelLogs, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [fuelLogs.vehicleId],
+    references: [vehicles.id],
+  }),
+  trip: one(trips, {
+    fields: [fuelLogs.tripId],
+    references: [trips.id],
+  }),
+}));
+
+export const expensesRelations = relations(expenses, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [expenses.vehicleId],
+    references: [vehicles.id],
+  }),
+}));

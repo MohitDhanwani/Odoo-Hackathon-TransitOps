@@ -12,15 +12,22 @@ export const getExpenses = catchAsync(async (req: Request, res: Response) => {
   if (vehicleId) conditions.push(eq(expenses.vehicleId, vehicleId as string));
   if (type) conditions.push(eq(expenses.type, type as string));
 
-  const query = db.select().from(expenses);
-  const result = conditions.length > 0 
-    ? await query.where(and(...conditions))
-    : await query;
+  const result = await db.query.expenses.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
+    with: {
+      vehicle: true,
+    },
+    orderBy: (expenses, { desc }) => [desc(expenses.createdAt)],
+  });
 
   return res.json(successResponse(result));
 });
 
 export const createExpense = catchAsync(async (req: Request, res: Response) => {
   const [expense] = await db.insert(expenses).values(req.body).returning();
-  return res.status(201).json(successResponse(expense));
+  const expenseWithRelations = await db.query.expenses.findFirst({
+    where: eq(expenses.id, expense.id),
+    with: { vehicle: true }
+  });
+  return res.status(201).json(successResponse(expenseWithRelations));
 });

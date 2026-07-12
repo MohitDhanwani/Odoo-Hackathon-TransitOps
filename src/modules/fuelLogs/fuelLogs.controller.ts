@@ -8,15 +8,23 @@ import { catchAsync } from '../../utils/catchAsync';
 export const getFuelLogs = catchAsync(async (req: Request, res: Response) => {
   const { vehicleId } = req.query;
 
-  const query = db.select().from(fuelLogs);
-  const result = vehicleId 
-    ? await query.where(eq(fuelLogs.vehicleId, vehicleId as string))
-    : await query;
+  const result = await db.query.fuelLogs.findMany({
+    where: vehicleId ? eq(fuelLogs.vehicleId, vehicleId as string) : undefined,
+    with: {
+      vehicle: true,
+      trip: true,
+    },
+    orderBy: (fuelLogs, { desc }) => [desc(fuelLogs.createdAt)],
+  });
 
   return res.json(successResponse(result));
 });
 
 export const createFuelLog = catchAsync(async (req: Request, res: Response) => {
   const [log] = await db.insert(fuelLogs).values(req.body).returning();
-  return res.status(201).json(successResponse(log));
+  const logWithRelations = await db.query.fuelLogs.findFirst({
+    where: eq(fuelLogs.id, log.id),
+    with: { vehicle: true, trip: true }
+  });
+  return res.status(201).json(successResponse(logWithRelations));
 });

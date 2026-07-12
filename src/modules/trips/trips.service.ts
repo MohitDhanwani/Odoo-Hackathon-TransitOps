@@ -1,5 +1,5 @@
 import { db } from '../../config/db';
-import { trips, vehicles, drivers } from '../../db/schema';
+import { trips, vehicles, drivers, fuelLogs } from '../../db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { ApiError } from '../../utils/apiError';
 
@@ -22,6 +22,11 @@ export const tripsService = {
     }).returning();
 
     return trip;
+  },
+
+  async createDispatched(data: any) {
+    const draftTrip = await this.createDraft(data);
+    return await this.dispatch(draftTrip.id);
   },
 
   async dispatch(tripId: string) {
@@ -87,6 +92,18 @@ export const tripsService = {
         })
         .where(eq(trips.id, tripId))
         .returning();
+
+      const fuelVal = parseFloat(fuelConsumed) || 0;
+      if (fuelVal > 0) {
+        const cost = (fuelVal * 1.25).toFixed(2); // standard rate $1.25 per liter
+        await tx.insert(fuelLogs).values({
+          vehicleId: trip.vehicleId,
+          tripId: trip.id,
+          liters: fuelConsumed,
+          cost: cost,
+          date: new Date().toISOString().split('T')[0]
+        });
+      }
 
       return updatedTrip;
     });

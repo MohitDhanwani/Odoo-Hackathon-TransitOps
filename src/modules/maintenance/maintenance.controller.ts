@@ -13,10 +13,13 @@ export const getMaintenanceLogs = catchAsync(async (req: Request, res: Response)
   if (status) conditions.push(eq(maintenanceLogs.status, status as any));
   if (vehicleId) conditions.push(eq(maintenanceLogs.vehicleId, vehicleId as string));
 
-  const query = db.select().from(maintenanceLogs);
-  const result = conditions.length > 0 
-    ? await query.where(and(...conditions))
-    : await query;
+  const result = await db.query.maintenanceLogs.findMany({
+    where: conditions.length > 0 ? and(...conditions) : undefined,
+    with: {
+      vehicle: true,
+    },
+    orderBy: (maintenanceLogs, { desc }) => [desc(maintenanceLogs.createdAt)],
+  });
 
   return res.json(successResponse(result));
 });
@@ -35,7 +38,12 @@ export const createMaintenanceLog = catchAsync(async (req: Request, res: Respons
   // Rule 9: Creating a maintenance record with status 'active' immediately sets the vehicle's status to 'in_shop'
   await db.update(vehicles).set({ status: 'in_shop' }).where(eq(vehicles.id, vehicle.id));
 
-  return res.status(201).json(successResponse(log));
+  const logWithRelations = await db.query.maintenanceLogs.findFirst({
+    where: eq(maintenanceLogs.id, log.id),
+    with: { vehicle: true }
+  });
+
+  return res.status(201).json(successResponse(logWithRelations));
 });
 
 export const closeMaintenanceLog = catchAsync(async (req: Request, res: Response) => {
@@ -58,5 +66,10 @@ export const closeMaintenanceLog = catchAsync(async (req: Request, res: Response
     await db.update(vehicles).set({ status: 'available' }).where(eq(vehicles.id, vehicle.id));
   }
 
-  return res.json(successResponse(updatedLog));
+  const updatedLogWithRelations = await db.query.maintenanceLogs.findFirst({
+    where: eq(maintenanceLogs.id, updatedLog.id),
+    with: { vehicle: true }
+  });
+
+  return res.json(successResponse(updatedLogWithRelations));
 });
